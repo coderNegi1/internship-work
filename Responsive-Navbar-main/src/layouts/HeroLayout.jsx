@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaEdit, FaUpload, FaSave, FaPlusCircle } from 'react-icons/fa';
 
-export default function FullPageGridLayout({ content = {}, isEditing, onContentChange }) {
+export default function HeroLayout({ content = {}, isEditing, onContentChange }) {
   const [localData, setLocalData] = useState(content);
   const [editingField, setEditingField] = useState(null);
 
   const fileInputRefs = {
-    gridImage: useRef(null),
+    heroImage: useRef(null),
   };
 
   // Keep localData in sync with the content prop
@@ -75,7 +75,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
                 type="text"
                 value={value}
                 onChange={handleChange(fieldKey)}
-                className="border-b border-green-500 bg-transparent focus:outline-none w-full p-1 text-black"
+                className="border-b border-blue-500 bg-transparent focus:outline-none w-full p-1"
                 autoFocus
               />
             )}
@@ -83,8 +83,8 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
               <textarea
                 value={value}
                 onChange={handleChange(fieldKey)}
-                className="border p-2 rounded resize-y focus:outline-green-500 w-full text-black"
-                rows={Math.max(3, (value.split('\n').length))}
+                className="border p-2 rounded resize-y focus:outline-blue-500 w-full"
+                rows={type === 'textarea' ? Math.max(3, (value.split('\n').length)) : undefined}
                 autoFocus
               />
             )}
@@ -99,7 +99,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
                 />
                 <button
                   onClick={(e) => { e.stopPropagation(); triggerImageUpload(fieldKey); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 mb-2"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mb-2"
                 >
                   <FaUpload /> {hasImage ? 'Change Image' : 'Upload Image'}
                 </button>
@@ -107,7 +107,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
             )}
             <button
               onClick={(e) => { e.stopPropagation(); setEditingField(null); }}
-              className="text-green-700 hover:text-green-900 flex-shrink-0 p-1"
+              className="text-green-600 hover:text-green-800 flex-shrink-0 p-1"
               aria-label="Save"
             >
               <FaSave />
@@ -123,7 +123,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
                   e.stopPropagation();
                   setEditingField(fieldKey);
                 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors duration-200 text-xl rounded-lg cursor-pointer"
+                className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 text-gray-500 hover:bg-gray-300 transition-colors duration-200 text-xl rounded-lg cursor-pointer"
                 aria-label="Add Image"
               >
                 <FaPlusCircle className="text-4xl mb-2" />
@@ -133,7 +133,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
 
             {isEditing && (type !== 'image' || hasImage) && (
               <FaEdit
-                className={`absolute ${type === 'image' ? 'inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg opacity-0 group-hover:opacity-100' : 'top-0 right-0 text-gray-400 hover:text-green-600 opacity-0 group-hover:opacity-100'} transition-opacity cursor-pointer`}
+                className={`absolute ${type === 'image' ? 'inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg opacity-0 ' : 'top-0 right-0 text-gray-400 hover:text-blue-500 opacity-0 '} transition-opacity cursor-pointer`}
                 onClick={(e) => { e.stopPropagation(); setEditingField(fieldKey); }}
                 aria-label={`Edit ${fieldKey}`}
               />
@@ -145,15 +145,12 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
   };
 
   return (
-    <section
-      className="relative text-white py-20 overflow-hidden min-h-[400px] flex items-center"
-      style={{ background: 'linear-gradient(to right, #4ade80, #22c55e)' }} // green gradient background
-    >
+    <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-20 overflow-hidden min-h-[400px] flex items-center">
       <div className="absolute inset-0 z-0">
-        {(localData.gridImage || content.gridImage) ? (
+        {(localData.heroImage || content.heroImage) ? (
           <img
-            src={localData.gridImage ?? content.gridImage}
-            alt="Services Section Image"
+            src={localData.heroImage ?? content.heroImage}
+            alt="About Us Hero"
             className="w-full h-full object-cover opacity-50 border"
             loading="lazy"
           />
@@ -161,7 +158,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
           <div className="w-full h-full bg-gray-700 opacity-50 flex items-center justify-center"></div>
         )}
         {renderEditableField(
-          'gridImage',
+          'heroImage',
           null,
           'image',
           'absolute inset-0 z-10'
@@ -169,14 +166,14 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
       </div>
       <div className="container mx-auto px-6 relative z-20 text-center flex flex-col">
         {renderEditableField(
-          'gridTitle',
-          <h1 className="text-5xl font-extrabold mb-4">{localData.gridTitle ?? content.gridTitle ?? 'Services'}</h1>, // changed text default
+          'heroTitle',
+          <h1 className="text-5xl font-extrabold mb-4">{localData.heroTitle ?? content.heroTitle ?? 'About Our Company '}</h1>,
           'text',
           'block'
         )}
         {renderEditableField(
-          'gridSubtitle',
-          <p className="text-xl max-w-2xl mx-auto">{localData.gridSubtitle ?? content.gridSubtitle ?? 'We are a dedicated team committed to innovation and excellence.'}</p>,
+          'heroSubtitle',
+          <p className="text-xl max-w-2xl mx-auto">{localData.heroSubtitle ?? content.heroSubtitle ?? 'We are a dedicated team committed to innovation and excellence.'}</p>,
           'textarea',
           'block'
         )}

@@ -321,15 +321,29 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaPlus, FaEdit, FaThLarge, FaCog } from 'react-icons/fa';
 import { useNavigation } from '../context/NavigationContext';
 
-// Import your external layouts here
-import { GridLayout, ListLayout, FullPageGridLayout, FullPageListLayout } from '../layouts';
+import {   GridLayout,
+  ListLayout,
+  TestimonialLayout,
+  HeroLayout,          
+  MissionVisionLayout, 
+  TeamLayout,          
+  CtaLayout } from '../layouts';
+import FullPageListLayout from '../layouts/FullPageListLayout';
+import FullPageGridLayout from '../layouts/FullPageGridLayout';
 
 const LayoutComponents = {
-  grid: GridLayout,
+   grid: GridLayout,
   list: ListLayout,
-  FullPage: FullPageGridLayout,
-  FullPageList: FullPageListLayout,
+  testimonial: TestimonialLayout,
+ 
+  hero: HeroLayout,                 
+  missionVision: MissionVisionLayout, 
+  team: TeamLayout,                 
+  cta: CtaLayout,  
+  fullList:FullPageListLayout,
+  fullPage: FullPageGridLayout
 };
+
 
 function Sidebar() {
   const navigate = useNavigate();
@@ -342,7 +356,7 @@ function Sidebar() {
     updateLogo,
     setActivePageId,
     selectedLayouts,
-    setLayoutForPage,
+    setLayoutForPage
   } = useNavigation();
 
   const [logoText, setLogoText] = useState(logo.text);
@@ -412,9 +426,8 @@ function Sidebar() {
                 className="cursor-pointer transition"
               >
                 <div
-                  className={`w-[400px] h-[300px] mx-auto bg-white overflow-hidden relative rounded border-2 ${
-                    isSelected ? 'border-cyan-500' : 'border-transparent'
-                  } hover:border-cyan-400`}
+                  className={`w-[400px] h-[300px] mx-auto bg-white overflow-hidden relative rounded border-2 ${isSelected ? 'border-cyan-500' : 'border-transparent'
+                    } hover:border-cyan-400`}
                 >
                   <div className="scale-[0.3] origin-top-left w-[1280px] h-auto pointer-events-none">
                     <React.Suspense fallback={<div className="bg-gray-700 flex items-center justify-center w-full h-full">Loading...</div>}>
@@ -560,9 +573,8 @@ function Sidebar() {
                 <div className="flex items-center justify-between">
                   <button
                     onClick={() => handleNavClick(item)}
-                    className={`flex-grow text-left py-1 px-2 ${
-                      isActive ? 'bg-cyan-800 text-cyan-400' : 'text-text hover:bg-gray-600'
-                    }`}
+                    className={`flex-grow text-left py-1 px-2 ${isActive ? 'bg-cyan-800 text-cyan-400' : 'text-text hover:bg-gray-600'
+                      }`}
                     title={`Go to ${item.title}`}
                   >
                     {item.title}

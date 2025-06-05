@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaEdit, FaUpload, FaSave, FaPlusCircle } from 'react-icons/fa';
 
-export default function FullPageGridLayout({ content = {}, isEditing, onContentChange }) {
+export default function CtaLayout({ content = {}, isEditing, onContentChange }) {
   const [localData, setLocalData] = useState(content);
   const [editingField, setEditingField] = useState(null);
 
-  const fileInputRefs = {
-    gridImage: useRef(null),
-  };
+  const fileInputRefs = {}; // No image fields in CTA, but keeping the structure
 
   // Keep localData in sync with the content prop
   useEffect(() => {
@@ -27,26 +25,16 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
     setLocalData(updatedData);
   };
 
-  // Handle image file changes
+  // Handle image file changes (not used in CTA but kept for consistency)
   const handleImageChange = (field) => (e) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setEditingField(null);
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const updatedData = { ...localData, [field]: reader.result };
-      setLocalData(updatedData);
-      setEditingField(null);
-    };
-    reader.readAsDataURL(file);
+    // This function might not be needed if there are no image fields in CTA
+    console.warn("handleImageChange called in CtaLayout, but no image fields defined.");
+    setEditingField(null);
   };
 
-  // Programmatically click hidden file input
+  // Programmatically click hidden file input (not used in CTA)
   const triggerImageUpload = (field) => {
-    fileInputRefs[field].current?.click();
+    console.warn("triggerImageUpload called in CtaLayout, but no image fields defined.");
   };
 
   // Reusable render function for editable fields
@@ -75,7 +63,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
                 type="text"
                 value={value}
                 onChange={handleChange(fieldKey)}
-                className="border-b border-green-500 bg-transparent focus:outline-none w-full p-1 text-black"
+                className="border-b border-blue-500 bg-transparent focus:outline-none w-full p-1"
                 autoFocus
               />
             )}
@@ -83,8 +71,8 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
               <textarea
                 value={value}
                 onChange={handleChange(fieldKey)}
-                className="border p-2 rounded resize-y focus:outline-green-500 w-full text-black"
-                rows={Math.max(3, (value.split('\n').length))}
+                className="border p-2 rounded resize-y focus:outline-blue-500 w-full"
+                rows={type === 'textarea' ? Math.max(3, (value.split('\n').length)) : undefined}
                 autoFocus
               />
             )}
@@ -99,7 +87,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
                 />
                 <button
                   onClick={(e) => { e.stopPropagation(); triggerImageUpload(fieldKey); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 mb-2"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mb-2"
                 >
                   <FaUpload /> {hasImage ? 'Change Image' : 'Upload Image'}
                 </button>
@@ -107,7 +95,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
             )}
             <button
               onClick={(e) => { e.stopPropagation(); setEditingField(null); }}
-              className="text-green-700 hover:text-green-900 flex-shrink-0 p-1"
+              className="text-green-600 hover:text-green-800 flex-shrink-0 p-1"
               aria-label="Save"
             >
               <FaSave />
@@ -123,7 +111,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
                   e.stopPropagation();
                   setEditingField(fieldKey);
                 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors duration-200 text-xl rounded-lg cursor-pointer"
+                className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 text-gray-500 hover:bg-gray-300 transition-colors duration-200 text-xl rounded-lg cursor-pointer"
                 aria-label="Add Image"
               >
                 <FaPlusCircle className="text-4xl mb-2" />
@@ -133,7 +121,7 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
 
             {isEditing && (type !== 'image' || hasImage) && (
               <FaEdit
-                className={`absolute ${type === 'image' ? 'inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg opacity-0 group-hover:opacity-100' : 'top-0 right-0 text-gray-400 hover:text-green-600 opacity-0 group-hover:opacity-100'} transition-opacity cursor-pointer`}
+                className={`absolute ${type === 'image' ? 'inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg opacity-0 group-hover:opacity-100' : 'top-0 right-0 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100'} transition-opacity cursor-pointer`}
                 onClick={(e) => { e.stopPropagation(); setEditingField(fieldKey); }}
                 aria-label={`Edit ${fieldKey}`}
               />
@@ -145,40 +133,30 @@ export default function FullPageGridLayout({ content = {}, isEditing, onContentC
   };
 
   return (
-    <section
-      className="relative text-white py-20 overflow-hidden min-h-[400px] flex items-center"
-      style={{ background: 'linear-gradient(to right, #4ade80, #22c55e)' }} // green gradient background
-    >
-      <div className="absolute inset-0 z-0">
-        {(localData.gridImage || content.gridImage) ? (
-          <img
-            src={localData.gridImage ?? content.gridImage}
-            alt="Services Section Image"
-            className="w-full h-full object-cover opacity-50 border"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-700 opacity-50 flex items-center justify-center"></div>
+    <section className="py-20 bg-blue-700 text-white text-center ">
+      <div className="container mx-auto flex flex-col ">
+        <h2 className="text-4xl font-bold mb-6">
+          {renderEditableField(
+            'ctaTitle',
+            <span>{localData.ctaTitle ?? content.ctaTitle ?? 'Ready to Transform Your Business?'}</span>,
+            'text'
+          )}
+        </h2>
+        {renderEditableField(
+          'ctaText',
+          <p className=" block text-xl mb-8 max-w-2xl mx-auto px-3  ">{localData.ctaText ?? content.ctaText ?? 'Contact us today to learn more about our services and how we can help you achieve your goals.'} 
+          </p>,
+          'textarea'
         )}
         {renderEditableField(
-          'gridImage',
-          null,
-          'image',
-          'absolute inset-0 z-10'
-        )}
-      </div>
-      <div className="container mx-auto px-6 relative z-20 text-center flex flex-col">
-        {renderEditableField(
-          'gridTitle',
-          <h1 className="text-5xl font-extrabold mb-4">{localData.gridTitle ?? content.gridTitle ?? 'Services'}</h1>, // changed text default
-          'text',
-          'block'
-        )}
-        {renderEditableField(
-          'gridSubtitle',
-          <p className="text-xl max-w-2xl mx-auto">{localData.gridSubtitle ?? content.gridSubtitle ?? 'We are a dedicated team committed to innovation and excellence.'}</p>,
-          'textarea',
-          'block'
+          'ctaButtonText',
+          <a
+            href="#"
+            className=" block bg-white text-blue-700 hover:bg-gray-200 text-lg font-semibold  transition duration-300 rounded-full px-3 py-2"
+          >
+            {localData.ctaButtonText ?? content.ctaButtonText ?? 'Get in Touch'}
+          </a>,
+          'text'
         )}
       </div>
     </section>
