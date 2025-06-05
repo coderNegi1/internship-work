@@ -3,6 +3,8 @@ export { default as GridLayout } from './GridLayout';
 export { default as ListLayout } from './ListLayout';
 
 export { default as TestimonialLayout} from './TestimonialLayout';
+export { default as TestimonialLayout1} from './TestimonialLayout1';
+
 
 
 

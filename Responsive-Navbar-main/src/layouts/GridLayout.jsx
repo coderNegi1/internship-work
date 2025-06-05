@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaEdit, FaUpload, FaSave } from 'react-icons/fa';
+import { FaEdit, FaUpload, FaSave, FaTrashAlt } from 'react-icons/fa'; // Added FaTrashAlt for delete
 
 export default function SalesHeroLayout({ content = {}, isEditing, editData = {}, setEditData }) {
     const [localData, setLocalData] = useState(editData);
@@ -8,6 +8,7 @@ export default function SalesHeroLayout({ content = {}, isEditing, editData = {}
     const fileInputRef = useRef(null);
 
     useEffect(() => {
+        // Only update localData if editData has truly changed, to prevent infinite loops
         if (JSON.stringify(editData) !== JSON.stringify(localData)) {
             setLocalData(editData);
         }
@@ -16,7 +17,7 @@ export default function SalesHeroLayout({ content = {}, isEditing, editData = {}
     const handleChange = (field) => (e) => {
         const updated = { ...localData, [field]: e.target.value };
         setLocalData(updated);
-        setEditData(updated);
+        setEditData(updated); // Propagate changes up to the parent
     };
 
     const handleImageChange = (e) => {
@@ -25,12 +26,25 @@ export default function SalesHeroLayout({ content = {}, isEditing, editData = {}
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            const updated = { ...localData, heroImg: reader.result };
+            const updated = { ...localData, heroImg: reader.result, bgColor: null }; // Clear bgColor if image is set
             setLocalData(updated);
             setEditData(updated);
-            setEditingField(null);
+            setEditingField(null); // Exit editing mode after upload
         };
         reader.readAsDataURL(file);
+    };
+
+    const handleImageDelete = () => {
+        const updated = { ...localData, heroImg: null }; // Remove image
+        setLocalData(updated);
+        setEditData(updated);
+        setEditingField(null);
+    };
+
+    const handleBgColorChange = (e) => {
+        const updated = { ...localData, bgColor: e.target.value, heroImg: null }; // Clear heroImg if color is set
+        setLocalData(updated);
+        setEditData(updated);
     };
 
     const triggerImageUpload = () => {
@@ -39,7 +53,6 @@ export default function SalesHeroLayout({ content = {}, isEditing, editData = {}
 
     const renderEditableField = (fieldKey, element, as = 'text') => {
         const isEditingThis = editingField === fieldKey;
-        const isHoveringThis = hoveredField === fieldKey;
 
         return (
             <div
@@ -74,12 +87,14 @@ export default function SalesHeroLayout({ content = {}, isEditing, editData = {}
                 ) : (
                     <div className="relative">
                         {element}
-                        {isEditing && (
+                        {isEditing && hoveredField === fieldKey && ( // Show edit icon only when editing and hovered
                             <button
                                 onClick={() => setEditingField(fieldKey)}
-                                className="absolute inset-0 opacity-0"
+                                className="absolute top-0 right-0 -mt-2 -mr-2 bg-white rounded-full p-1 shadow-md text-blue-500 hover:text-blue-700"
                                 aria-label={`Edit ${fieldKey}`}
-                            />
+                            >
+                                <FaEdit size={14} />
+                            </button>
                         )}
                     </div>
                 )}
@@ -87,9 +102,70 @@ export default function SalesHeroLayout({ content = {}, isEditing, editData = {}
         );
     };
 
+    const heroStyle = {
+        backgroundImage: localData.heroImg ? `url(${localData.heroImg})` : 'none',
+        backgroundColor: localData.bgColor || 'transparent', // Fallback to transparent if no color
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+    };
+
     return (
-        <main className="flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 md:mt-14 pb-10">
-            <div className="max-md:mt-7 max-w-lg">
+        <main
+            className="relative flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 md:mt-14 pb-10 min-h-[500px]" // Added min-h for visibility
+            style={heroStyle}
+        >
+            {isEditing && (
+                <div className="absolute top-4 right-4 flex gap-2 z-10">
+                    {localData.heroImg ? (
+                        <>
+                            <button
+                                onClick={handleImageDelete}
+                                className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md"
+                                title="Delete Image"
+                            >
+                                <FaTrashAlt />
+                            </button>
+                            <button
+                                onClick={triggerImageUpload}
+                                className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md"
+                                title="Change Image"
+                            >
+                                <FaUpload />
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            onClick={triggerImageUpload}
+                            className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md"
+                            title="Upload Image"
+                        >
+                            <FaUpload />
+                        </button>
+                    )}
+                    {!localData.heroImg && ( // Only show color picker if no image
+                        <div className="relative">
+                            <input
+                                type="color"
+                                value={localData.bgColor || '#ffffff'} // Default to white if no color set
+                                onChange={handleBgColorChange}
+                                className="p-1 border-none rounded-full cursor-pointer h-10 w-10"
+                                title="Choose Background Color"
+                            />
+                             <span className="absolute inset-0 border-2 border-transparent hover:border-blue-500 rounded-full pointer-events-none"></span> {/* Visual cue for hover */}
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        className="hidden"
+                        accept="image/*"
+                    />
+                </div>
+            )}
+
+            <div className="max-md:mt-7 max-w-lg relative z-0"> {/* Ensure content is above image */}
                 <h1 className="text-5xl md:text-[74px] text-blue-500 max-w-96 leading-tight">
                     {renderEditableField(
                         'headlineStart',
@@ -127,7 +203,6 @@ export default function SalesHeroLayout({ content = {}, isEditing, editData = {}
                     )}
                 </div>
 
-                {/* Example: make these also editable if needed */}
                 <div className="flex items-center max-md:justify-center text-gray-600 text-xs md:text-sm mt-8">
                     <div className="flex items-center gap-2 py-3 pr-6 border-r border-gray-300">
                         <svg className="w-6 h-6" fill="#1AB553" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>
@@ -139,8 +214,6 @@ export default function SalesHeroLayout({ content = {}, isEditing, editData = {}
                     </div>
                 </div>
             </div>
-
-            {/* Optional image rendering logic can go here */}
         </main>
     );
 }
