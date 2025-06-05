@@ -125,12 +125,14 @@
 
   import React, { useEffect, useRef, useState } from 'react';
   import { useNavigation } from '../context/NavigationContext';
-  import { GridLayout, ListLayout, NewHeroLayout } from '../layouts';
+  import { GridLayout, ListLayout, NewHeroLayout, FullPageGridLayout, FullPageListLayout } from '../layouts';
 
   const LayoutComponents = {
     grid: GridLayout,
     list: ListLayout,
     newHero: NewHeroLayout,
+    fullPageGrid: FullPageGridLayout,
+    FullPageList: FullPageListLayout,
   };
 
   const PageCard = React.forwardRef(

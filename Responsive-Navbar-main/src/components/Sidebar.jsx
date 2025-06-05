@@ -322,11 +322,13 @@ import { FaPlus, FaEdit, FaThLarge, FaCog } from 'react-icons/fa';
 import { useNavigation } from '../context/NavigationContext';
 
 // Import your external layouts here
-import { GridLayout, ListLayout } from '../layouts';
+import { GridLayout, ListLayout, FullPageGridLayout, FullPageListLayout } from '../layouts';
 
 const LayoutComponents = {
   grid: GridLayout,
   list: ListLayout,
+  FullPage: FullPageGridLayout,
+  FullPageList: FullPageListLayout,
 };
 
 function Sidebar() {
