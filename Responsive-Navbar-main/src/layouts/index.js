@@ -1,5 +1,13 @@
 // src/layouts/index.js
 export { default as GridLayout } from './GridLayout';
 export { default as ListLayout } from './ListLayout';
-export { default as NewHeroLayout } from './NewHeroLayout';
-export { default as NewLayout} from './NewLayout'
+
+export { default as TestimonialLayout} from './TestimonialLayout';
+
+
+
+// Add the newly created independent layouts
+export { default as HeroLayout } from './HeroLayout';
+export { default as MissionVisionLayout } from './MissionVisionLayout';
+export { default as TeamLayout } from './TeamLayout';
+export { default as CtaLayout } from './CtaLayout';
