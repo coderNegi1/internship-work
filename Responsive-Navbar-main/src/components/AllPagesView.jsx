@@ -13,26 +13,54 @@ import {
     CtaLayout 
 } from '../layouts';
 
-const LayoutComponents = {
-    grid: GridLayout,
-    list: ListLayout,
-    testimonial: TestimonialLayout,
-    testimonial1: TestimonialLayout1,
-    hero: HeroLayout,                 
-    missionVision: MissionVisionLayout, 
-    team: TeamLayout,                 
-    cta: CtaLayout,   
-};
+
+  import React, { useEffect, useRef, useState } from 'react';
+  import { useNavigation } from '../context/NavigationContext';
+  import {   GridLayout,
+  ListLayout,
+  TestimonialLayout,
+  HeroLayout,          
+  MissionVisionLayout, 
+  TeamLayout,          
+  CtaLayout } from '../layouts';
+import FullPageListLayout from '../layouts/FullPageListLayout';
+import FullPageGridLayout from '../layouts/FullPageGridLayout';
+
+
+  const LayoutComponents = {
+  grid: GridLayout,
+  list: ListLayout,
+  testimonial: TestimonialLayout,
+  hero: HeroLayout,                 
+  missionVision: MissionVisionLayout, 
+  team: TeamLayout,                
+  cta: CtaLayout,  
+  fullList: FullPageListLayout,
+  fullPage: FullPageGridLayout
+  };
 
 const PageCard = React.forwardRef(
     ({ page, layoutKey, updateContent, deleteItem, setActivePageId }, ref) => {
-        const [isEditing, setIsEditing] = useState(false);
-        const [editData, setEditData] = useState(page.content); // Initialize with full content
+        // const [isEditing, setIsEditing] = useState(false);
+        // const [editData, setEditData] = useState(page.content); // Initialize with full content
+      const [isEditing, setIsEditing] = useState(false);
+      const [editData, setEditData] = useState({
+        title: page.content.title,
+        description: page.content.description,
+         ...page.content,
+      });
 
         useEffect(() => {
             // Update editData when page.content changes (e.g., from parent save)
             setEditData(page.content);
         }, [page.content]);
+      useEffect(() => {
+        setEditData({
+          title: page.content.title,
+          description: page.content.description,
+           ...page.content,
+        });
+      }, [page.content]);
 
         const handleSave = () => {
             updateContent(page.id, editData);
@@ -48,21 +76,41 @@ const PageCard = React.forwardRef(
 
         const LayoutComponent = LayoutComponents[layoutKey] || GridLayout;
 
-        return (
-            <div
-                ref={ref}
-                className="relative min-h-screen bg-bg-light shadow border p-8 mx-4 my-6 mt-25"
-                id={`page-${page.id}`}
-            >
-                {/* Layout preview ONLY */}
-                <div className="my-6">
-                    <LayoutComponent
-                        content={page.content}
-                        isEditing={isEditing}
-                        editData={editData}
-                        setEditData={setEditData}
-                    />
-                </div>
+        // return (
+        //     <div
+        //         ref={ref}
+        //         className="relative min-h-screen bg-bg-light shadow border p-8 mx-4 my-6 mt-25"
+        //         id={`page-${page.id}`}
+        //     >
+        //         {/* Layout preview ONLY */}
+        //         <div className="my-6">
+        //             <LayoutComponent
+        //                 content={page.content}
+        //                 isEditing={isEditing}
+        //                 editData={editData}
+        //                 setEditData={setEditData}
+        //             />
+        //         </div>
+      return (
+        <div
+          ref={ref}
+          className="relative min-h-screen bg-bg-light shadow border p-8 mx-4 my-6 mt-25"
+          id={`page-${page.id}`}
+        >
+          {/* Remove title/description outside layout */}
+
+          {/* Layout preview ONLY */}
+          <div className="my-6">
+            <LayoutComponent
+              content={page.content}
+              isEditing={isEditing}
+              editData={editData}
+              setEditData={setEditData}
+              onContentChange={(newData) => {
+              setEditData(newData); 
+            }}
+            />
+          </div>
 
                 {/* Edit/Delete/Save/Cancel Controls - Centered and Icon-based */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1 flex justify-center gap-1 z-0"> {/* Added z-10 */}
@@ -118,8 +166,8 @@ export default function AllPagesView() {
         selectedLayouts,
     } = useNavigation();
 
-    const containerRef = useRef(null);
-    const pageRefs = useRef({});
+  const containerRef = useRef(null);
+  const pageRefs = useRef({});
 
     useEffect(() => {
         if (!activePageId || !containerRef.current) return;

@@ -735,8 +735,11 @@ import {
   HeroLayout,
   MissionVisionLayout,
   TeamLayout,
-  CtaLayout
+  CtaLayout,
+  FullPageListLayout,
+  FullPageGridLayout
 } from '../layouts';
+
 
 const LayoutComponents = {
   grid: GridLayout,
@@ -747,6 +750,8 @@ const LayoutComponents = {
   missionVision: MissionVisionLayout,
   team: TeamLayout,
   cta: CtaLayout,
+  fullList:FullPageListLayout,
+  fullPage: FullPageGridLayout
 };
 // --- End Layout Components Imports ---
 
