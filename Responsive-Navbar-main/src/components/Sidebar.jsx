@@ -739,6 +739,7 @@ import {
   FullPageListLayout,
   FullPageGridLayout
 } from '../layouts';
+import AwardsSlider from '../layouts/AwardSliderLayout';
 
 
 const LayoutComponents = {
@@ -751,7 +752,8 @@ const LayoutComponents = {
   team: TeamLayout,
   cta: CtaLayout,
   fullList:FullPageListLayout,
-  fullPage: FullPageGridLayout
+  fullPage: FullPageGridLayout,
+  Award:AwardsSlider,
 };
 // --- End Layout Components Imports ---
 

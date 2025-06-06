@@ -1,277 +1,215 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FaEdit, FaUpload, FaSave, FaPlusCircle, FaTrash } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaEdit, FaSave, FaPlusCircle, FaTrash } from 'react-icons/fa';
 
 export default function FullPageListLayout({ content = {}, isEditing, onContentChange }) {
   const [localData, setLocalData] = useState({
-    coreTitle: '',
-    coreValues: [],
+    leftTitle: 'Get in Touch with Us',
+    leftSubtitle: 'We’re here to assist you with:',
+    bullets: ['Discussing your use case', 'Answering any queries', 'Exploring our pricing options'],
+    formFields: [
+      { label: 'First Name' },
+      { label: 'Last Name' },
+      { label: 'Work Email' },
+      { label: 'Phone Number' },
+      { label: 'Company' },
+      { label: 'Message' }
+    ],
     ...content,
   });
 
-  const [editingField, setEditingField] = useState(null);
-  const [editingCardIndex, setEditingCardIndex] = useState(null);
-  const [pendingImage, setPendingImage] = useState(null);
-
-  const fileInputRefs = useRef([]);
+  const [editing, setEditing] = useState({ type: null, index: null });
+  const [formValues, setFormValues] = useState({});
 
   useEffect(() => {
     setLocalData({
-      coreTitle: '',
-      coreValues: [],
+      leftTitle: 'Get in Touch with Us',
+      leftSubtitle: 'We’re here to assist you with:',
+      bullets: ['Discussing your use case', 'Answering any queries', 'Exploring our pricing options'],
+      formFields: [
+        { label: 'First Name' },
+        { label: 'Last Name' },
+        { label: 'Work Email' },
+        { label: 'Phone Number' },
+        { label: 'Company' },
+        { label: 'Message' }
+      ],
       ...content,
     });
   }, [content]);
 
   useEffect(() => {
-    if (onContentChange) {
-      onContentChange(localData);
-    }
-  }, [localData, onContentChange]);
+    onContentChange?.(localData);
+  }, [localData]);
 
-  const handleChangeCoreTitle = (e) => {
-    setLocalData((prev) => ({ ...prev, coreTitle: e.target.value }));
-  };
+  const handleInputChange = (index) => (e) => {
+  const updated = { ...formValues, [localData.formFields[index].label]: e.target.value };
+  setFormValues(updated);
+};
 
-  const handleChangeCardField = (index, field) => (e) => {
-    const newCoreValues = [...localData.coreValues];
-    newCoreValues[index] = {
-      ...newCoreValues[index],
-      [field]: e.target.value,
-    };
-    setLocalData((prev) => ({ ...prev, coreValues: newCoreValues }));
-  };
+const handleSubmit = () => {
+  // Save to localStorage
+  localStorage.setItem('contactFormSubmission', JSON.stringify(formValues));
 
-  const handleImageChange = (index) => (e) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setEditingField(null);
-      setEditingCardIndex(null);
-      return;
-    }
+  // Show alert
+  alert('Details sent successfully. We will contact you shortly.');
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPendingImage(reader.result); // Save to pending state
-    };
-    reader.readAsDataURL(file);
-  };
+  // Reset form
+  setFormValues({});
+};
 
-  const triggerImageUpload = (index) => {
-    fileInputRefs.current[index]?.click();
-  };
-
-  const addNewCard = () => {
-    const newCoreValues = [
-      ...localData.coreValues,
-      { title: '', desc: '', image: null },
-    ];
-    setLocalData((prev) => ({ ...prev, coreValues: newCoreValues }));
-  };
-
-  const deleteCard = (index) => {
-    if (window.confirm('Delete this core value card?')) {
-      const newCoreValues = localData.coreValues.filter((_, i) => i !== index);
-      setLocalData((prev) => ({ ...prev, coreValues: newCoreValues }));
-      setEditingField(null);
-      setEditingCardIndex(null);
-      setPendingImage(null);
-    }
-  };
-
-  const renderEditableField = (fieldKey, element, type = 'text', customClasses = '', index = null) => {
-    const isEditingThis = editingField === fieldKey && editingCardIndex === index;
-    let value;
-    if (index !== null) {
-      value = localData.coreValues[index]?.[fieldKey] ?? '';
+  const handleFieldChange = (key, index = null) => (e) => {
+    if (key === 'bullets') {
+      const updatedBullets = [...localData.bullets];
+      updatedBullets[index] = e.target.value;
+      setLocalData({ ...localData, bullets: updatedBullets });
+    } else if (key === 'formFields') {
+      const updatedFields = [...localData.formFields];
+      updatedFields[index].label = e.target.value;
+      setLocalData({ ...localData, formFields: updatedFields });
     } else {
-      value = localData[fieldKey] ?? '';
+      setLocalData({ ...localData, [key]: e.target.value });
     }
-    const hasImage = type === 'image' ? !!value : true;
-
-    return (
-      <div
-        className={`relative inline-block group ${customClasses}`}
-        onClick={() => {
-          if (isEditing) {
-            setEditingField(fieldKey);
-            setEditingCardIndex(index);
-          }
-        }}
-      >
-        {isEditingThis ? (
-          <div className="flex flex-col items-center justify-center w-full">
-            {type === 'text' && (
-              <input
-                type="text"
-                value={value}
-                onChange={index !== null ? handleChangeCardField(index, fieldKey) : handleChangeCoreTitle}
-                className="border-b border-blue-500 bg-transparent focus:outline-none w-full p-1"
-                autoFocus
-              />
-            )}
-            {type === 'textarea' && (
-              <textarea
-                value={value}
-                onChange={index !== null ? handleChangeCardField(index, fieldKey) : () => {}}
-                className="border p-2 rounded resize-y focus:outline-blue-500 w-full"
-                rows={Math.max(3, (value?.split('\n')?.length || 3))}
-                autoFocus
-              />
-            )}
-            {type === 'image' && index !== null && (
-              <div className="flex flex-col items-center w-full">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange(index)}
-                  ref={(el) => (fileInputRefs.current[index] = el)}
-                  className="hidden"
-                />
-                {!pendingImage && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      triggerImageUpload(index);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mb-2"
-                  >
-                    <FaUpload /> Upload Image
-                  </button>
-                )}
-                {pendingImage && (
-                  <div className="flex flex-col items-center gap-2">
-                    <img
-                      src={pendingImage}
-                      alt="Preview"
-                      className="w-24 h-24 object-cover border rounded mb-2"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const newCoreValues = [...localData.coreValues];
-                        newCoreValues[index] = {
-                          ...newCoreValues[index],
-                          image: pendingImage,
-                        };
-                        setLocalData((prev) => ({ ...prev, coreValues: newCoreValues }));
-                        setPendingImage(null); // ✅ Reset image preview
-                        setEditingField(null);
-                        setEditingCardIndex(null);
-                      }}
-                      className="text-green-600 hover:text-green-800 flex-shrink-0 p-1"
-                    >
-                      <FaSave />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            {type !== 'image' && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingField(null);
-                  setEditingCardIndex(null);
-                }}
-                className="text-green-600 hover:text-green-800 flex-shrink-0 p-1"
-                aria-label="Save"
-              >
-                <FaSave />
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="relative w-full h-full flex items-center justify-center">
-            {element}
-            {isEditing && type === 'image' && !hasImage && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingField(fieldKey);
-                  setEditingCardIndex(index);
-                }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 text-gray-500 hover:bg-gray-300 transition-colors duration-200 text-xl rounded-lg cursor-pointer"
-              >
-                <FaPlusCircle className="text-4xl mb-2" />
-                Add Image
-              </button>
-            )}
-            {isEditing && (type !== 'image' || hasImage) && (
-              <FaEdit
-                className="absolute top-0 right-0 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingField(fieldKey);
-                  setEditingCardIndex(index);
-                }}
-              />
-            )}
-          </div>
-        )}
-      </div>
-    );
   };
+
+  const renderEditable = (value, onChange) => (
+    <input
+      type="text"
+      value={value}
+      onChange={onChange}
+      className="border-b border-blue-500 focus:outline-none bg-transparent p-1"
+      autoFocus
+    />
+  );
 
   return (
-    <section className="py-20 bg-white space-y-20">
-      <div className="container mx-auto px-6 text-center">
-        <h2 className="text-4xl font-bold text-gray-800 mb-12">
-          {renderEditableField('coreTitle', <span>{localData.coreTitle || 'Core Values'}</span>, 'text')}
-        </h2>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {localData.coreValues.length === 0 && !isEditing && (
-            <p className="text-gray-500">No core values added yet.</p>
-          )}
-
-          {localData.coreValues.map((core, i) => (
-            <div key={i} className="bg-gray-50 p-6 rounded-lg shadow-md flex flex-col items-center relative">
-              <div className="w-32 h-32 mb-4 relative rounded-full overflow-hidden">
-                {renderEditableField(
-                  'image',
-                  core.image ? (
-                    <img src={core.image} alt={`Core ${i + 1}`} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-gray-300" />
-                  ),
-                  'image',
-                  'absolute inset-0',
-                  i
-                )}
-              </div>
-              <h3 className="text-xl font-semibold text-blue-600 mb-2">
-                {renderEditableField('title', <span>{core.title || `Value ${i + 1}`}</span>, 'text', '', i)}
-              </h3>
-              {renderEditableField(
-                'desc',
-                <p className="text-gray-600 text-sm text-center">{core.desc}</p>,
-                'textarea',
-                '',
-                i
-              )}
-              {isEditing && (
-                <button
-                  onClick={() => deleteCard(i)}
-                  className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                  aria-label="Delete Card"
-                >
-                  <FaTrash />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {isEditing && (
-          <div className="mt-12 flex justify-center">
-            <button
-              onClick={addNewCard}
-              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              <FaPlusCircle /> Add New Core Value
-            </button>
-          </div>
+    <section className="py-10 px-4 md:px-5 bg-white">
+      <div className="grid md:grid-cols-2 gap-10 items-start">
+        {/* Left Section */}
+      <div
+  className="flex flex-col justify-center h-full p-10 text-black"
+  style={{
+    backgroundImage: `url("https://ctwebsite2025.blob.core.windows.net/media/celebalwebsite2025/assets_webp/common/contact-us-bg.webp")`,
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    // backgroundPosition: 'center',
+    width: '100%',
+    height: '100%',
+  }}
+>
+  <div className=" p-6 rounded-lg">
+    <h2 className="text-xl text-blue-400">
+      {isEditing && editing.type === 'leftTitle'
+        ? renderEditable(localData.leftTitle, handleFieldChange('leftTitle'))
+        : (
+          <span onClick={() => isEditing && setEditing({ type: 'leftTitle' })}>
+            {localData.leftTitle}
+          </span>
         )}
+    </h2>
+    <h1 className="text-4xl font-bold text-black mt-2">
+      {isEditing && editing.type === 'leftSubtitle'
+        ? renderEditable(localData.leftSubtitle, handleFieldChange('leftSubtitle'))
+        : (
+          <span onClick={() => isEditing && setEditing({ type: 'leftSubtitle' })}>
+            {localData.leftSubtitle}
+          </span>
+        )}
+    </h1>
+    <ul className="space-y-3 mt-6">
+      {localData.bullets.map((text, i) => (
+        <li key={i} className="flex items-start gap-2">
+          <span className="text-blue-400 text-lg">✔</span>
+          {isEditing && editing.type === 'bullets' && editing.index === i
+            ? renderEditable(text, handleFieldChange('bullets', i))
+            : (
+              <span
+                className="cursor-pointer"
+                onClick={() => isEditing && setEditing({ type: 'bullets', index: i })}
+              >
+                {text}
+              </span>
+            )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
+
+     {/* Right Section - Contact Form */}
+<div className="w-full flex flex-col items-center">
+  <h1 className="text-3xl font-bold text-center mb-6">Talk to us</h1>
+  <div className="space-y-4 w-full">
+    <div className="grid sm:grid-cols-2 gap-4">
+      {localData.formFields.map((field, index) => (
+        <div key={index} className="relative group">
+          {isEditing && editing.type === 'formField' && editing.index === index ? (
+            renderEditable(field.label, handleFieldChange('formFields', index))
+          ) : (
+            <label
+              className="block text-sm font-medium text-gray-700 cursor-pointer"
+              onClick={() => isEditing && setEditing({ type: 'formField', index })}
+            >
+              {field.label}
+            </label>
+          )}
+          <input
+            type={
+              field.label.toLowerCase().includes('email') ? 'email' :
+              field.label.toLowerCase().includes('phone') ? 'tel' :
+              'text'
+            }
+            className="mt-1 block w-full border border-gray-300 rounded p-2"
+            placeholder={field.label}
+            value={formValues[field.label] || ''}
+            onChange={handleInputChange(index)}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Add/Remove Fields */}
+  {isEditing && (
+    <div className="flex flex-wrap items-center gap-4 mt-4">
+      <button
+        className="text-green-600 flex items-center gap-2"
+        onClick={() =>
+          setLocalData(prev => ({
+            ...prev,
+            formFields: [...prev.formFields, { label: 'New Field' }]
+          }))
+        }
+      >
+        <FaPlusCircle /> Add Field
+      </button>
+      {localData.formFields.length > 0 && (
+        <button
+          className="text-red-600 flex items-center gap-2"
+          onClick={() =>
+            setLocalData(prev => ({
+              ...prev,
+              formFields: prev.formFields.slice(0, -1)
+            }))
+          }
+        >
+          <FaTrash /> Remove Last Field
+        </button>
+      )}
+    </div>
+  )}
+
+  {/* Submit Button */}
+  <div className="pt-6 w-full">
+    <button
+      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded"
+      onClick={handleSubmit}
+    >
+      Submit
+    </button>
+  </div>
+</div>
+
       </div>
     </section>
   );
