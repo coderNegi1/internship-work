@@ -373,6 +373,8 @@ export const NavigationProvider = ({ children }) => {
 
   const addItem = (title) => {
     const slug = title.toLowerCase().replace(/\s+/g, '-');
+    const exists = navItems.find((item) => item.slug === slug);
+  if (exists) return exists;
     const newItem = {
       id: Date.now(),
       title,

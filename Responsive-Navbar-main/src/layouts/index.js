@@ -11,3 +11,5 @@ export { default as HeroLayout } from './HeroLayout';
 export { default as MissionVisionLayout } from './MissionVisionLayout';
 export { default as TeamLayout } from './TeamLayout';
 export { default as CtaLayout } from './CtaLayout';
+export { default as FullPageListLayout } from './FullPageListLayout';
+export { default as FullPageGridLayout } from './FullPageGridLayout';
