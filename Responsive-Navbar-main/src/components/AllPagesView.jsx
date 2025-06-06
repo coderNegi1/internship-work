@@ -10,7 +10,13 @@ import {
     HeroLayout,           
     MissionVisionLayout, 
     TeamLayout,           
-    CtaLayout 
+    CtaLayout,
+    PricingPlansLayout,
+  ServicesLayout,
+  HeroCarousal,
+  Blogs,
+  Careers,
+  Profile 
 } from '../layouts';
 
 const LayoutComponents = {
@@ -22,6 +28,12 @@ const LayoutComponents = {
     missionVision: MissionVisionLayout, 
     team: TeamLayout,                 
     cta: CtaLayout,   
+    princingPlans: PricingPlansLayout,
+      services : ServicesLayout,
+      heroCarousal: HeroCarousal,
+      blogs: Blogs,
+      careers:Careers,
+      profile:Profile
 };
 
 const PageCard = React.forwardRef(

@@ -13,3 +13,9 @@ export { default as HeroLayout } from './HeroLayout';
 export { default as MissionVisionLayout } from './MissionVisionLayout';
 export { default as TeamLayout } from './TeamLayout';
 export { default as CtaLayout } from './CtaLayout';
+export {default as PricingPlansLayout} from "./PricingPlansLayout.jsx";
+export {default as ServicesLayout} from "./ServicesLayout.jsx";
+export {default as HeroCarousal} from "./HeroCarousal.jsx"
+export {default as Blogs} from "./Blogs.jsx"
+export {default as Careers} from "./Careers.jsx"
+export {default as Profile} from "./Profile.jsx"
