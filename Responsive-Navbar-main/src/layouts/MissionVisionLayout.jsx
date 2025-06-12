@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaEdit, FaUpload, FaSave, FaPlusCircle } from 'react-icons/fa';
+import { FaEdit, FaUpload, FaSave, FaPlusCircle, FaPalette } from 'react-icons/fa';
 
 export default function MissionVisionLayout({ content = {}, isEditing, onContentChange }) {
   const [localData, setLocalData] = useState(content);
   const [editingField, setEditingField] = useState(null);
+  const [backgroundColor, setBackgroundColor] = useState(content.backgroundColor || '#ffffff');
+  const [editingBackgroundColor, setEditingBackgroundColor] = useState(false);
+  const backgroundColorInputRef = useRef(null);
 
   const fileInputRefs = {
     missionImage: useRef(null),
@@ -13,14 +16,15 @@ export default function MissionVisionLayout({ content = {}, isEditing, onContent
   // Keep localData in sync with the content prop
   useEffect(() => {
     setLocalData(content);
+    setBackgroundColor(content.backgroundColor || '#ffffff');
   }, [content]);
 
   // Propagate changes up to a parent handler if provided
   useEffect(() => {
     if (onContentChange) {
-      onContentChange(localData);
+      onContentChange({ ...localData, backgroundColor });
     }
-  }, [localData, onContentChange]);
+  }, [localData, backgroundColor, onContentChange]);
 
   // Handle changes for text and textarea fields
   const handleChange = (field) => (e) => {
@@ -47,14 +51,29 @@ export default function MissionVisionLayout({ content = {}, isEditing, onContent
 
   // Programmatically click hidden file input
   const triggerImageUpload = (field) => {
-    fileInputRefs[field].current?.click();
+    fileInputRefs.current?.[field]?.click();
+  };
+
+  const handleBackgroundColorChange = (e) => {
+    setBackgroundColor(e.target.value);
+  };
+
+  const handleBackgroundColorEditClick = () => {
+    setEditingBackgroundColor(true);
+    setTimeout(() => {
+      backgroundColorInputRef.current?.focus();
+    }, 0);
+  };
+
+  const handleBackgroundColorSave = () => {
+    setEditingBackgroundColor(false);
   };
 
   // Reusable render function for editable fields
   const renderEditableField = (fieldKey, element, type = 'text', customClasses = '') => {
     const isEditingThis = editingField === fieldKey;
-    const value = localData[fieldKey] ?? content[fieldKey] ?? '';
-    const hasImage = (localData[fieldKey] || content[fieldKey]);
+    const value = localData?.[fieldKey] ?? content?.[fieldKey] ?? '';
+    const hasImage = (localData?.[fieldKey] || content?.[fieldKey]);
 
     const handleClick = (e) => {
       if (type === 'image' && isEditing && !isEditingThis) {
@@ -95,7 +114,7 @@ export default function MissionVisionLayout({ content = {}, isEditing, onContent
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange(fieldKey)}
-                  ref={fileInputRefs[fieldKey]}
+                  ref={fileInputRefs?.[fieldKey]}
                   className="hidden"
                 />
                 <button
@@ -134,7 +153,7 @@ export default function MissionVisionLayout({ content = {}, isEditing, onContent
 
             {isEditing && (type !== 'image' || hasImage) && (
               <FaEdit
-                className={`absolute ${type === 'image' ? 'inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg opacity-0 ' : 'top-0 right-0 text-gray-400 hover:text-blue-500 opacity-0 '} transition-opacity cursor-pointer`}
+                className={`absolute ${type === 'image' ? 'inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg opacity-0 group-hover:opacity-100' : 'top-0 right-0 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100'} transition-opacity duration-200 cursor-pointer`}
                 onClick={(e) => { e.stopPropagation(); setEditingField(fieldKey); }}
                 aria-label={`Edit ${fieldKey}`}
               />
@@ -146,26 +165,48 @@ export default function MissionVisionLayout({ content = {}, isEditing, onContent
   };
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20" style={{ backgroundColor: backgroundColor }}>
+      {isEditing && (
+        <div className="absolute top-4 right-4 z-10 flex items-center">
+          {editingBackgroundColor ? (
+            <>
+              <input
+                type="color"
+                value={backgroundColor}
+                onChange={handleBackgroundColorChange}
+                ref={backgroundColorInputRef}
+                className="mr-2"
+              />
+              <button onClick={handleBackgroundColorSave} className="text-green-600 hover:text-green-800">
+                <FaSave />
+              </button>
+            </>
+          ) : (
+            <button onClick={handleBackgroundColorEditClick} className="text-gray-400 hover:text-blue-500">
+              <FaPalette />
+            </button>
+          )}
+        </div>
+      )}
       <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
         {/* Mission */}
         <div className="flex flex-col items-center text-center md:text-left">
           <h2 className="text-4xl font-bold text-blue-700 mb-6">
             {renderEditableField(
               'missionTitle',
-              <span>{localData.missionTitle ?? content.missionTitle ?? 'Our Mission'}</span>,
+              <span>{localData?.missionTitle ?? content?.missionTitle ?? 'Our Mission'}</span>,
               'text'
             )}
           </h2>
           {renderEditableField(
             'missionDescription',
-            <p className="text-lg text-gray-700 leading-relaxed mb-6">{localData.missionDescription ?? content.missionDescription ?? 'To provide innovative solutions that empower businesses and individuals to achieve their full potential through technology and creative problem-solving.'}</p>,
+            <p className="text-lg text-gray-700 leading-relaxed mb-6">{localData?.missionDescription ?? content?.missionDescription ?? 'To provide innovative solutions that empower businesses and individuals to achieve their full potential through technology and creative problem-solving.'}</p>,
             'textarea'
           )}
           <div className="w-full h-64 overflow-hidden rounded-lg shadow-lg relative">
-            {(localData.missionImage || content.missionImage) ? (
+            {(localData?.missionImage || content?.missionImage) ? (
               <img
-                src={localData.missionImage ?? content.missionImage}
+                src={localData?.missionImage ?? content?.missionImage}
                 alt="Our Mission"
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -187,19 +228,19 @@ export default function MissionVisionLayout({ content = {}, isEditing, onContent
           <h2 className="text-4xl font-bold text-indigo-700 mb-6">
             {renderEditableField(
               'visionTitle',
-              <span>{localData.visionTitle ?? content.visionTitle ?? 'Our Vision'}</span>,
+              <span>{localData?.visionTitle ?? content?.visionTitle ?? 'Our Vision'}</span>,
               'text'
             )}
           </h2>
           {renderEditableField(
             'visionDescription',
-            <p className="text-lg text-gray-700 leading-relaxed mb-6">{localData.visionDescription ?? content.visionDescription ?? 'To be a global leader in sustainable technology, fostering a future where innovation drives positive impact on society and the environment.'}</p>,
+            <p className="text-lg text-gray-700 leading-relaxed mb-6">{localData?.visionDescription ?? content?.visionDescription ?? 'To be a global leader in sustainable technology, fostering a future where innovation drives positive impact on society and the environment.'}</p>,
             'textarea'
           )}
           <div className="w-full h-64 overflow-hidden rounded-lg shadow-lg relative">
-            {(localData.visionImage || content.visionImage) ? (
+            {(localData?.visionImage || content?.visionImage) ? (
               <img
-                src={localData.visionImage ?? content.visionImage}
+                src={localData?.visionImage ?? content?.visionImage}
                 alt="Our Vision"
                 className="w-full h-full object-cover"
                 loading="lazy"

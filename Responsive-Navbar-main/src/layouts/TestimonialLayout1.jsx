@@ -174,7 +174,7 @@ export default function TestimonialLayout({ content = {}, isEditing, onContentCh
             {element}
             {isEditing && (
               <FaEdit
-                className="absolute top-0 right-0 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                className="absolute top-0 right-0 text-gray-400 hover:text-blue-500 opacity-0  transition-opacity cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   setEditingField(id ? { testimonialId: id, field: key } : key);
